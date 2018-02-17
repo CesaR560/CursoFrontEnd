@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tienda de Libros</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+<body>
+    <div class="container">
+
+    <h1 id="titulo-azul" class="color-rojo mt-4 mb-4 text-center">Tienda de libros</h1>
+    <div class="text-center">
+        <a href="Registro.html" class="btn btn-link"><i class="fas fa-user-plus"></i> Registrar Libros</a> |
+        <a href="consulta.html" class="btn btn-link"><i class="fas fa-address-book"></i> Consultar Libros</a>
+    </div>
+    </div>
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+
+        (function(){
+
+
+            $('#btnGuardarAutor').on('click', function () {
+                $.ajax({
+                    url:'http://localhost:5000/autores/registrar',
+                    type:'POST',
+                    data:{
+                        nombre:$('#txtNombreAutor').val()
+                    },
+                    dataType:'json',
+                    success:function(resultado){
+                        console.log(resultado);
+                    },
+                    error:function (err) {
+                        console.error(err);
+                    }
+                });
+            });
+
+            $.ajax({
+                url:'http://localhost:5000/libros/consultar',
+                type:'GET',
+                dataType:'json',
+                success:function(resultado){
+                    console.log(resultado);
+                },
+                error:function (err) {
+                    console.error(err);
+                }
+            });
+
+            $.ajax({
+                url:'http://localhost:5000/autores/consultar',
+                type:'GET',
+                dataType:'json',
+                success:function(resultado){
+                    console.log('Autores: ', resultado);
+                },
+                error:function (err) {
+                    console.error(err);
+                }
+            });
+
+
+        })();
+
+
+    </script>
+</body>
+</html>

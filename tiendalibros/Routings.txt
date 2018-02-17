@@ -1,0 +1,135 @@
+
+___________________________________________________________________________________________________
+
+								Descripción de las respuestas
+___________________________________________________________________________________________________
+
+
+Todas las respuestas llegan en formato: 
+
+{
+	codigo:#,
+	mensaje:'',
+	data:[opcional]
+}
+
+
+
+
+codigo:
+
+0: No se encontraron resultados.
+1: Consulta correcta
+2: Inserción correcta
+-1: Error en el servidor
+
+
+mensaje: 
+
+Es un string con información que envía el servidor.
+
+
+data: 
+
+En caso de consultar datos, data llegará como un Array o un Object con la información.
+
+
+
+
+___________________________________________________________________________________________________
+
+							Definición de las rutas disponibles
+___________________________________________________________________________________________________
+
+URL: '/libros/registrar'
+Parámetros: 
+	
+	 nombre: [String] -> Nombre del libro que se va a agregar.
+      autor: [String] -> Id del autor.
+     precio: [Number] -> Precio del libro
+    portada: [String] -> Dirección URL del libro
+	
+
+Método: POST
+Descripción: Registra un nuevo libro en la base de datos.
+Retorno: Obtener el código y el mensaje de la respuesta. Data llegará en null.
+
+________________________________________________
+
+URL: '/autores/registrar'
+Parámetros:
+
+ 	nombre: [String] -> Nombre del autor
+
+Método: POST
+Descripción: Registra un nuevo autor de libros en la base de datos.
+Retorno: Obtener el código y el mensaje de la respuesta. Data llegará en null.
+
+________________________________________________
+
+
+URL: '/libros/consultar'
+Parámetros: N/A
+Método: GET
+Descripción: Consulta todos los libros ordenados primero por precio (de mayor a menor y luego por nombre)
+Retorno: Array
+
+________________________________________________
+
+URL: '/autores/consultar'
+Parámetros: N/A
+Método: GET
+Descripción: Consulta todos los autores ordenados alfabéticamente.
+Retorno: Array
+
+________________________________________________
+
+
+URL: '/libro/:id'
+Parámetros:
+	
+	Se recibe el id del libro en formato string. No se debe enviar como un Query String: llave=valor
+	Ej: /libro/5a85d0457306200ecc6096b7
+
+Método: GET
+Descripción: Consulta los detalles de un libro registrado.
+Retorno: Object
+
+________________________________________________
+
+
+URL: '/libros/autor/:autor'
+Parámetros:
+
+	Se recibe el id del autor en formato string. No se debe enviar como un Query String: llave=valor
+	Ej: /libros/autor/5a85ce2a21465e8ac266240d
+
+Método: GET
+Descripción: Consulta todos los libros de un autor específicado
+Retorno: Array
+
+________________________________________________
+
+URL: '/libros/buscar/:q'
+Parámetros:
+
+	Se recibe el texto que se espera encontrar en el nombre del libro. No se debe enviar como un Query String: llave=valor
+	Ej: /libros/buscar/ensayo
+
+Método: GET
+Descripción: Consulta todos los libros que coincidan con el criterio de búsqueda.
+Retorno: Array
+
+________________________________________________
+
+URL: '/autor/:id'
+Parámetros:
+
+	Se recibe el id del autor. No se debe enviar como un Query String: llave=valor
+	Ej: /autor/5a85e695f950a0044059103c
+
+Método: GET
+Descripción: Consulta un autor por su ID
+Retorno: Object
+
+________________________________________________
