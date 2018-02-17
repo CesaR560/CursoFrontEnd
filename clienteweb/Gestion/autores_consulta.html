@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Consulta de Usuarios</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+
+</head>
+<body>
+
+<div class="container-fluid">
+    <h1 class="text-center mt-4 mb-4">Consulta de Autores</h1>
+    <div class="container mb-4 text-right">
+        <a href="libros.html" class="mr-3"><i class="fas fa-address-book"></i> Registrar Autores</a> |
+        <a href="../Cliente/index.html" class="ml-3"><i class="fas fa-user-plus"></i> Volver al Inicio</a>
+    </div>
+
+    <div class="container">
+        <table id="tbAutores" class="table table-striped">
+            <thead>
+            <tr>
+                <th id="thNombre">Nombre</th>
+               <!-- <th id="thPrecio">Precio</th>
+                <th id="thIdAutor">idAutor</th>
+                <th id="thPortada">Portada</th>-->
+
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="../js/plugins.js"></script>
+<script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/plugins.js"></script>
+<script src="../js/sweetalert2.js"></script>
+<script src="../js/handlebars.min-v4.0.11.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script id="template-autores" type="text/x-handlebars-template">
+    {{#each autores}}
+    <tr>
+        <td headers="thNombre">{{this.nombre}}</td>
+        <!--
+        <td headers="thPrecio">{{this.precio}}</td>
+        <td headers="thIdAutor">{{this.idAutor}}</td>
+        <td headers="thPortada">{{this.portada}}</td>
+
+         {{#if this.celular}}
+         <td headers="thCelular">{{this.celular}}</td>
+         {{else}}
+         <td headers="thCelular">N/A</td>
+         {{/if}}
+
+         <td headers="thNacionalidad">{{this.nacionalidad}}</td>
+         -->
+    </tr>
+    {{/each}}
+</script>
+
+<script>
+    /*
+     (function(){
+         $.ajax({
+             url:'http://localhost:5000/libros/consultar',
+             type:'GET',
+             dataType:'json',
+             success:function(resultado){
+                 console.log('Libros: ', resultado);
+             },
+             error:function (err) {
+                 console.error(err);
+             }
+         });
+     })();
+ */
+
+    var tblAutores = $('#tblAutores');
+    var tbody = tblAutores.find('tbody');
+    var source   = document.getElementById("template-autores").innerHTML;
+    var renderFilas = Handlebars.compile(source);
+
+    function cargarAutores(){
+        tbody.empty();
+        $.ajax({
+            url:'http://localhost:5000/autores/consultar',
+            type:'GET',
+            dataType:'json',
+            success:function(resultado){
+                console.log('Autores: ', resultado['data']);
+
+                var autores = resultado['data'] //String
+                if (autores.length === 0){
+                    mostrarMensajeSinDatos();
+                    return false;
+                }
+                ///Render de las filas con Handlebars
+                tbody.append( renderFilas({autores:autores}) );
+            },
+            error:function (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    function mostrarMensajeSinDatos(){
+        console.log('No hay registros');
+    }
+
+    cargarAutores();
+
+</script>
+
+</body>
+</html>

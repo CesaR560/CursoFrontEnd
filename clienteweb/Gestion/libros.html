@@ -24,7 +24,8 @@
     <div class="container text-center mt-5 pb-2">
         <h1 class="mt-4 mb-4 text-center">Registro de Libros </h1>
         <div class="container mb-2 text-right">
-            <a href="Cliente/index.html" class="ml-3"><i class="fas fa-home"></i> Volver al Inicio</a>
+            <a href="../Cliente/index.html" class="ml-3"><i class="fas fa-home"></i> Volver al Inicio</a> |
+            <a href="libros_consulta.html" class="ml-3"><i class="fas fa-home"></i> Consultar libros</a>
         </div>
     </div>
 
@@ -35,12 +36,16 @@
                 <label for="txtNombre">Nombre de libro:</label>
                 <input type="text" class="form-control" id="txtNombre" required>
             </div>
-
+            <div class="form-group col-md-5">
+                <label for="txtIdAutor">Id Autor:</label>
+                <input type="text" class="form-control" id="txtIdAutor" required>
+            </div>
+           <!--
             <div class="form-group col-md-5">
                 <label for="cmbAutores">Id Autor:</label>
                 <select id="cmbAutores" class="form-control" required></select>
             </div>
-
+            -->
             <div class="form-group col-md-5">
                 <label for="txtPrecio">Precio de libro:</label>
                 <input type="text" class="form-control" id="txtPrecio">
@@ -61,28 +66,44 @@
     </div>
 </div>
 
-<script src="js/plugins.js"></script>
-<script src="js/jquery-3.3.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/plugins.js"></script>
-<script src="js/sweetalert2.js"></script>
+<script src="../js/plugins.js"></script>
+<script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/plugins.js"></script>
+<script src="../js/sweetalert2.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
+    function limpiarFormulario(){
+        var formulario = $('#formulario');
+        formulario.find('.is-valid, .is-invalid')
+            .removeClass('is-invalid')
+            .removeClass('is-valid');
+
+        formulario.find('input[type="text"], textarea, input[type="email"]').val('');
+        formulario.find('select').val('-1');
+        formulario.find('input[type="radio"]').prop('checked', false); //Quita la seleccion de radios y checks
+    }
+
 
     (function(){
 
 
-        $('#btnGuardarAutor').on('click', function () {
+        $('#btnGuardar').on('click', function () {
             $.ajax({
-                url:'http://localhost:5000/autores/registrar',
+                url:'http://localhost:5000/libros/registrar',
                 type:'POST',
                 data:{
-                    nombre:$('#txtNombreAutor').val()
+                    nombre:$('#txtNombre').val(),
+                    idAutor:$('#txtIdAutor').val(),
+                    precio:$('#txtPrecio').val(),
+                    portada:$('#txtPortada').val()
                 },
                 dataType:'json',
                 success:function(resultado){
                     console.log(resultado);
+                    toastr.success('Se guardó la información correctamente', 'Registro Exitoso');
+                    limpiarFormulario();
                 },
                 error:function (err) {
                     console.error(err);
@@ -103,11 +124,11 @@
         });
 
         $.ajax({
-            url:'http://localhost:5000/autores/consultar',
+            url:'http://localhost:5000/libros/consultar',
             type:'GET',
             dataType:'json',
             success:function(resultado){
-                console.log('Autores: ', resultado);
+                console.log('Libros: ', resultado);
             },
             error:function (err) {
                 console.error(err);
