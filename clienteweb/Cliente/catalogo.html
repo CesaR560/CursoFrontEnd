@@ -64,7 +64,7 @@
     <div class="card-body">
         <h5 class="card-title">Titulo de la tarjeta</h5>
         <p class="card-text">Autor: <span class="autor-nombre"></span></p>
-        <a href="#" class="btn btn-info">Detalle</a>
+        <a href="libro.html" class="btn btn-info">Detalle</a>
         <a href="#" class="btn btn-primary">Comprar</a>
     </div>
 </div>
@@ -247,7 +247,7 @@
         item.css('background-color', color);
         item.find('h5.card-title').text(nombre);
         item.find('span.autor-nombre').text(autor);
-        item.find('.btn').on('click', removerTarjeta); //Se asigna el evento clic a cada boton
+        //item.find('a.btn btn-info').href('libro.html'); //Se asigna el evento clic a cada boton
         contenedor.append(item);
     }
 
