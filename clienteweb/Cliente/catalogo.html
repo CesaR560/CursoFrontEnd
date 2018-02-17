@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Catalogo de libros</title>
+</head>
+<body>
+
+
+<div class="container-fluid">
+    <div class="container text-center mt-5 pb-2">
+        <h1 class="mt-4 mb-4 text-center">Catalogo de libros </h1>
+        <div class="container mb-2 text-right">
+            <a href="../Cliente/index.html" class="ml-3"><i class="fas fa-home"></i> Volver al Inicio</a> |
+
+        </div>
+    </div>
+
+    <div id="formulario" class="container border-top pt-4">
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="txtNombre">Nombre del libro:</label>
+                <input type="text" class="form-control" id="txtNombre">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="cmbAutores">Autor:</label>
+                <select id="cmbAutores" class="form-control"></select>
+            </div>
+
+
+            <div class="form-group col-md-12 text-right">
+                <button id="btnBuscarNombre" class="btn btn-success btn-enlinea"><i class="fas fa-save"></i> Buscar por nombre</button>
+                <button id="btnGuardar" class="btn btn-success btn-enlinea"><i class="fas fa-save"></i> Buscar por autor</button>
+                <button id="btnBuscarTodo" class="btn btn-success btn-enlinea"><i class="fas fa-save"></i> Buscar todo</button>
+                <button id="btnLimpiar" class="btn btn-danger btn-enlinea"><i class="fas fa-times"></i> Limpiar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="container">
+
+    <div class="container-fluid">
+
+        <div class="row mx-auto" id="div-contenedor">
+
+        </div>
+    </div>
+</div>
+
+
+<div id="div-plantilla" class="card mr-2" style="width: 30%;margin-bottom: 10px;" hidden>
+    <div class="card-body">
+        <h5 class="card-title">Titulo de la tarjeta</h5>
+        <p class="card-text">Autor: <span class="autor-nombre"></span></p>
+        <a href="#" class="btn btn-info">Detalle</a>
+        <a href="#" class="btn btn-primary">Comprar</a>
+    </div>
+</div>
+
+
+<script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/plugins.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/plugins.js"></script>
+<script src="../js/sweetalert2.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<script>
+
+    var plantilla = $('#div-plantilla');
+    var contenedor = $('#div-contenedor');
+
+
+
+    function validarInput(elemento){
+        var texto = elemento.val() || '';
+        if (texto.trim().length === 0){
+            elemento.addClass('is-invalid').removeClass('is-valid');
+            return 'El campo <b>'+obtenerLabel(elemento)+'</b> está vacío. <br/>';
+        }
+        if (elemento.attr('pattern')!==null){
+            if( ! new RegExp(elemento.attr('pattern')).test(elemento.val()) ){
+                elemento.addClass('is-invalid').removeClass('is-valid');
+                return 'El campo <b>'+obtenerLabel(elemento)+'</b> no cumple. <br/>';
+            }
+        }
+        elemento.removeClass('is-invalid').addClass('is-valid');
+        return '';
+    }
+    function obtenerLabel(elemento) {
+        var txtLabel = elemento.parent().find('label[for="'+elemento.attr('id')+'"]').text();
+        console.log('la informacion del label es: ' + txtLabel);
+        return txtLabel.substring(0, txtLabel.length-1);
+    }
+
+    function validarSelect(elemento){
+        if (elemento.val() === '-1'){
+            elemento.addClass('is-invalid').removeClass('is-valid');
+            return 'Debe seleccionar una opción de '+obtenerLabel(elemento)+'<br/>';
+        }
+        elemento.removeClass('is-invalid').addClass('is-valid');
+        return '';
+    }
+
+
+
+    function cargarLibros(){
+        contenedor.empty();
+
+        var mensajevalidacion = '';
+        mensajevalidacion += validarSelect($('#cmbAutores'));
+        if (mensajevalidacion.length > 0){
+
+            console.log('<p>'+mensajevalidacion+'</p>');
+            swal({
+                title:'Error de validación',
+                html: '<p class="text-center">'+mensajevalidacion+'</p>',
+                type: 'warning'
+            });
+            return;
+        }
+
+       $.ajax({
+            url:'http://localhost:5000/libros/autor/' + $('#cmbAutores').val(),
+            type:'GET',
+            dataType:'json',
+            success:function(resultado){
+                console.log('Libros: ', resultado['data']);
+
+                var libros = resultado['data'] //String
+                if (libros.length === 0){
+                    mostrarMensajeSinDatos();
+                    return false;
+                }
+                for( var i =0; i < resultado['data'].length; i++){
+                    var libro = resultado['data'][i];
+                    //var option = $('<option>').val(autor._id).text(autor.nombre);
+                    agregarTarjeta(libro.nombre,libro.autor.nombre);
+                }
+
+            },
+            error:function (err) {
+                console.error(err);
+            }
+        });
+    }
+
+
+    function cargarLibrosPorNombre(){
+        contenedor.empty();
+
+        var mensajevalidacion = '';
+        mensajevalidacion += validarInput($('#txtNombre'));
+        if (mensajevalidacion.length > 0){
+            console.log('<p>'+mensajevalidacion+'</p>');
+            swal({
+                title:'Error de validación',
+                html: '<p class="text-center">'+mensajevalidacion+'</p>',
+                type: 'warning'
+            });
+            return;
+        }
+        $.ajax({
+            url:'http://localhost:5000/libros/buscar/' + $('#txtNombre').val(),
+            type:'GET',
+            dataType:'json',
+            success:function(resultado){
+                console.log('Libros: ', resultado['data']);
+
+                var libros = resultado['data'] //String
+                if (libros.length === 0){
+                    mostrarMensajeSinDatos();
+                    return false;
+                }
+                for( var i =0; i < resultado['data'].length; i++){
+                    var libro = resultado['data'][i];
+                    //var option = $('<option>').val(autor._id).text(autor.nombre);
+                    agregarTarjeta(libro.nombre,libro.autor.nombre);
+                }
+
+            },
+            error:function (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    function cargarLibrosTodo(){
+        contenedor.empty();
+
+        $.ajax({
+            url:'http://localhost:5000/libros/consultar',
+            type:'GET',
+            dataType:'json',
+            success:function(resultado){
+                console.log('Libros: ', resultado['data']);
+
+                var libros = resultado['data'] //String
+                if (libros.length === 0){
+                    mostrarMensajeSinDatos();
+                    return false;
+                }
+                for( var i =0; i < resultado['data'].length; i++){
+                    var libro = resultado['data'][i];
+                    //var option = $('<option>').val(autor._id).text(autor.nombre);
+                    agregarTarjeta(libro.nombre,libro.autor.nombre);
+                }
+
+            },
+            error:function (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    $('#btnBuscarNombre').on('click', function () {
+        cargarLibrosPorNombre();
+    });
+
+    $('#btnBuscarTodo').on('click', function () {
+        cargarLibrosTodo();
+    });
+
+    $('#btnGuardar').on('click', function () {
+        cargarLibros();
+    });
+
+    function agregarTarjeta(nombre,autor){
+        var item = plantilla.clone(); //clona el objeto base
+        item.removeAttr('id'); //remueve el ID para que este no se repita
+        item.removeAttr('hidden'); //se remueve el atributo hidden para que el nuevo elemento sea visible en la interfaz
+        //var color = '#'+obtenerColor();
+        var color = '#d8ecc5'
+        item.css('background-color', color);
+        item.find('h5.card-title').text(nombre);
+        item.find('span.autor-nombre').text(autor);
+        item.find('.btn').on('click', removerTarjeta); //Se asigna el evento clic a cada boton
+        contenedor.append(item);
+    }
+
+    function removerTarjeta(e) {
+        var btn = $(this); //Esto hace referencia al botón que disparó la función
+        //El método parent, busca el elemento contenedor del item indicado, en este caso del botón
+        //Estos métodos se pueden invocar en cadena, hasta llegar al elemento más grande
+        //remove, elimina el objeto del árbol DOM.
+        btn.parent().parent().remove();
+    }
+
+    function obtenerColor(){
+        var r = (Math.round(Math.random()* 127) + 127).toString(16);
+        var g = (Math.round(Math.random()* 127) + 127).toString(16);
+        var b = (Math.round(Math.random()* 127) + 127).toString(16);
+        return '' + r + g + b;
+    }
+
+    $('#btnLimpiar').on('click', function () {
+        limpiarFormulario();
+    });
+    function limpiarFormulario(){
+        contenedor.empty()
+        var formulario = $('#formulario');
+        formulario.find('.is-valid, .is-invalid')
+            .removeClass('is-invalid')
+            .removeClass('is-valid');
+
+        formulario.find('input[type="text"], textarea, input[type="email"]').val('');
+        formulario.find('select').val('-1');
+        formulario.find('input[type="radio"]').prop('checked', false); //Quita la seleccion de radios y checks
+    }
+
+    function cargarAutores(){
+        $.ajax({
+            url:'http://localhost:5000/autores/consultar',
+            type:'GET',
+            dataType:'json',
+            success:function(resultado){
+
+                console.log(resultado['data']);
+
+                var selector = $('#cmbAutores').html('');
+                var option = $('<option>');
+                selector.append(option.text('Seleccione una opción').val(-1));
+                for( var i =0; i < resultado['data'].length; i++){
+                    var autor = resultado['data'][i];
+                    var option = $('<option>').val(autor._id).text(autor.nombre);
+                    selector.append(option);
+                }
+            },
+            error:function (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    function init(){
+        cargarAutores();
+    }
+
+    init();
+
+</script>
+
+
+
+</body>
+</html>

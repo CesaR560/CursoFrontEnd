@@ -26,7 +26,7 @@
             <tr>
                 <th id="thNombre">Nombre</th>
                 <th id="thPrecio">Precio</th>
-                <th id="thIdAutor">idAutor</th>
+                <th id="thIdAutor">Autor</th>
                 <th id="thPortada">Portada</th>
 
             </tr>
@@ -38,8 +38,8 @@
     </div>
 </div>
 
-<script src="../js/plugins.js"></script>
 <script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/plugins.js"></script>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/plugins.js"></script>
 <script src="../js/sweetalert2.js"></script>
@@ -51,7 +51,7 @@
     <tr>
         <td headers="thNombre">{{this.nombre}}</td>
         <td headers="thPrecio">{{this.precio}}</td>
-        <td headers="thIdAutor">{{this.idAutor}}</td>
+        <td headers="thIdAutor">{{this.autor.nombre}}</td>
         <td headers="thPortada">{{this.portada}}</td>
        <!--
         {{#if this.celular}}

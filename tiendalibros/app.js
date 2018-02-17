@@ -71,15 +71,27 @@ function registrarAutor(req, res){
 
 
 function consultarLibros(req, res){
-	var libros = db.collection('libros');
-	var opciones = {
-        collation:{locale:'es'},
-		sort:{'precio': -1, 'nombre': 1}
-	};
-	libros.find({}, opciones).toArray(function(err, data){
-        if (err) { return validarError(res, err, 'Ocurrió un error al consultar los libros') }
-        res.send(construirRespuestaDatos(data, 'Libros encontrados'));
-	});
+    var libros = db.collection('libros');
+    libros.aggregate(
+        [
+            {
+                '$lookup': {
+                    from: "autores",
+                    localField: "autor",
+                    foreignField: "_id",
+                    as: "autor"
+                },
+            },
+            { "$unwind": "$autor" },
+            { $sort:{'precio': -1, 'nombre': 1} }
+        ],
+        function(err, cursor) {
+            cursor.toArray(function(err, documents) {
+                if (err) { return validarError(res, err, 'Ocurrió un error al consultar los libros') }
+                res.send(construirRespuestaDatos(documents, 'Libros encontrados'));
+            });
+        }
+    );
 }
 
 
@@ -98,12 +110,28 @@ function consultarAutores(req, res){
 
 
 function consultarLibroId(req, res){
-	var id = new ObjectId(req.params.id);
-	var post = db.collection('libros');
-	post.findOne({_id:id}, function(err, data){
-        if (err) { return validarError(res, err, 'Error al consultar el libro por ID') }
-        res.send({mensaje:'Libro encontrado', codigo:1, data:data});
-	});
+    var id = new ObjectId(req.params.id);
+    var libros = db.collection('libros');
+    libros.aggregate(
+        [
+            {
+                $lookup:{
+                    from:'autores',
+                    localField:'autor',
+                    foreignField:'_id',
+                    as:'autor'
+                }
+            },
+            { "$unwind": "$autor" },
+            {   $match: { _id : new ObjectId(id) } }
+        ],
+        function(err, cursor) {
+            cursor.toArray(function(err, documents) {
+                if (err) { return validarError(res, err, 'Ocurrió un error al consultar los libros') }
+                res.send({mensaje:'Libro encontrado', codigo:1, data:documents[0]});
+            });
+        }
+    );
 }
 
 function consultarAutorPorId(req, res){
@@ -118,26 +146,59 @@ function consultarAutorPorId(req, res){
 
 
 function consultarLibrosPorAutor(req, res){
-	var autores = db.collection('libros');
-	var idAutor = req.params.autor;
-	console.log(idAutor);
-	autores.find({autor:new ObjectId(idAutor)}).toArray(function(err, data){
-        if (err) { return validarError(res, err, 'Error al consultar libros por autor') }
-        res.send(construirRespuestaDatos(data, 'Libros encontrados por autor'));
-	});
+    var libros = db.collection('libros');
+    var idAutor = req.params.autor;
+    libros.aggregate(
+        [
+            {  $match: { autor : new ObjectId(idAutor) } },
+            {
+                $lookup:{
+                    from:'autores',
+                    localField:'autor',
+                    foreignField:'_id',
+                    as:'autor'
+                }
+            },
+            {  $unwind: "$autor" },
+            {  $sort:{'precio': -1, 'nombre': 1} }
+        ],
+        function(err, cursor) {
+            cursor.toArray(function(err, documents) {
+                if (err) { return validarError(res, err, 'Ocurrió un error al consultar los libros') }
+                res.send(construirRespuestaDatos(documents, 'Libros encontrados'));
+            });
+        }
+    );
 }
 
 function consultarLibrosPorNombre(req, res){
     var q = req.params.q;
     console.log(q);
     var regExpr = new RegExp(q, 'i');
-
     var libros = db.collection('libros');
-    libros.find({nombre:regExpr}).toArray(function(err, data){
-        if (err) { return validarError(res, err, 'Error al consultar libros por nombre') }
-        res.send(construirRespuestaDatos(data, 'Libros encontrados por nombre'));
-    });
+    libros.aggregate(
+        [
+            {
+                $lookup:{
+                    from:'autores',
+                    localField:'autor',
+                    foreignField:'_id',
+                    as:'autor'
+                }
+            },
+            { "$unwind": "$autor" },
+            {   $sort:{'precio': -1, 'nombre': 1} },
+            {   $match: { nombre : { $regex: regExpr, $options:'i' } } }
+        ],
+        function(err, cursor) {
+            cursor.toArray(function(err, documents) {
+                if (err) { return validarError(res, err, 'Ocurrió un error al consultar los libros') }
+                res.send(construirRespuestaDatos(documents, 'Libros encontrados'));
+            });
+        }
+    );
 }
+
 
 function validarError(res, err, mensaje) {
     console.error(err);

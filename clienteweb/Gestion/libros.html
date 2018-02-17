@@ -36,23 +36,24 @@
                 <label for="txtNombre">Nombre de libro:</label>
                 <input type="text" class="form-control" id="txtNombre" required>
             </div>
+            <!--
             <div class="form-group col-md-5">
                 <label for="txtIdAutor">Id Autor:</label>
                 <input type="text" class="form-control" id="txtIdAutor" required>
             </div>
-           <!--
-            <div class="form-group col-md-5">
-                <label for="cmbAutores">Id Autor:</label>
-                <select id="cmbAutores" class="form-control" required></select>
-            </div>
             -->
             <div class="form-group col-md-5">
+                <label for="cmbAutores">Autor:</label>
+                <select id="cmbAutores" class="form-control" required></select>
+            </div>
+
+            <div class="form-group col-md-5">
                 <label for="txtPrecio">Precio de libro:</label>
-                <input type="text" class="form-control" id="txtPrecio">
+                <input type="text" class="form-control" id="txtPrecio" required>
             </div>
             <div class="form-group col-md-5">
                 <label for="txtPortada">Portada de libro:</label>
-                <input type="text" class="form-control" id="txtPortada">
+                <input type="text" class="form-control" id="txtPortada" required>
             </div>
 
 
@@ -74,6 +75,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
+
     function limpiarFormulario(){
         var formulario = $('#formulario');
         formulario.find('.is-valid, .is-invalid')
@@ -84,18 +86,90 @@
         formulario.find('select').val('-1');
         formulario.find('input[type="radio"]').prop('checked', false); //Quita la seleccion de radios y checks
     }
+    function validarInput(elemento){
+        if (elemento.val().trim().length === 0){
+            elemento.addClass('is-invalid').removeClass('is-valid');
+            return 'El campo <b>'+obtenerLabel(elemento)+'</b> está vacío. <br/>';
+        }
+        if (elemento.attr('pattern')!==null){
+            if( ! new RegExp(elemento.attr('pattern')).test(elemento.val()) ){
+                elemento.addClass('is-invalid').removeClass('is-valid');
+                return 'El campo <b>'+obtenerLabel(elemento)+'</b> no cumple. <br/>';
+            }
+        }
+        elemento.removeClass('is-invalid').addClass('is-valid');
+        return '';
+    }
+    function validarSelect(elemento){
+        if (elemento.val() === '-1'){
+            elemento.addClass('is-invalid').removeClass('is-valid');
+            return 'Debe seleccionar una opción de '+obtenerLabel(elemento)+'<br/>';
+        }
+        elemento.removeClass('is-invalid').addClass('is-valid');
+        return '';
+    }
 
+    function obtenerLabel(elemento) {
+        var txtLabel = elemento.parent().find('label[for="'+elemento.attr('id')+'"]').text();
+        return txtLabel.substring(0, txtLabel.length-1);
+    }
+
+    function cargarAutores(){
+        $.ajax({
+            url:'http://localhost:5000/autores/consultar',
+            type:'GET',
+            dataType:'json',
+            success:function(resultado){
+
+                console.log(resultado['data']);
+
+                var selector = $('#cmbAutores').html('');
+                var option = $('<option>');
+                selector.append(option.text('Seleccione una opción').val(-1));
+                for( var i =0; i < resultado['data'].length; i++){
+                    var autor = resultado['data'][i];
+                    var option = $('<option>').val(autor._id).text(autor.nombre);
+                    selector.append(option);
+                }
+            },
+            error:function (err) {
+                console.error(err);
+            }
+        });
+    }
 
     (function(){
+      $('#btnGuardar').on('click', function () {
+          // Validacion de espacios en blanco
+          var requeridos = $('#formulario').find('*[required]');
+          var mensaje = '';
+          for (var i = 0; i < requeridos.length; i++){
+              var elementoJQuery = $(requeridos[i]);
+              switch (elementoJQuery.prop('tagName')){
+                  case 'INPUT':
+                      mensaje += validarInput(elementoJQuery);
+                      break;
+                  case 'SELECT':
+                      mensaje += validarSelect(elementoJQuery);
+                      break;
+              }
+          }
+          if (mensaje.length > 0){
+              console.log('<p>'+mensaje+'</p>');
+              swal({
+                  title:'Error de validación',
+                  html: '<p class="text-center">'+mensaje+'</p>',
+                  type: 'warning'
+              });
+              return;
+          }
 
-
-        $('#btnGuardar').on('click', function () {
-            $.ajax({
+          $.ajax({
                 url:'http://localhost:5000/libros/registrar',
                 type:'POST',
                 data:{
                     nombre:$('#txtNombre').val(),
-                    idAutor:$('#txtIdAutor').val(),
+                    autor:$('#cmbAutores').val(),
                     precio:$('#txtPrecio').val(),
                     portada:$('#txtPortada').val()
                 },
@@ -111,33 +185,18 @@
             });
         });
 
-        $.ajax({
-            url:'http://localhost:5000/libros/consultar',
-            type:'GET',
-            dataType:'json',
-            success:function(resultado){
-                console.log(resultado);
-            },
-            error:function (err) {
-                console.error(err);
-            }
-        });
-
-        $.ajax({
-            url:'http://localhost:5000/libros/consultar',
-            type:'GET',
-            dataType:'json',
-            success:function(resultado){
-                console.log('Libros: ', resultado);
-            },
-            error:function (err) {
-                console.error(err);
-            }
+        $('#btnLimpiar').on('click', function () {
+            limpiarFormulario();
         });
 
 
     })();
 
+    function init(){
+        cargarAutores();
+    }
+
+    init();
 
 </script>
 
