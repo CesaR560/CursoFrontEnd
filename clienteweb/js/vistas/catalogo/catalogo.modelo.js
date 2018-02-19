@@ -1,0 +1,5 @@
+var catalogoModelo = {
+
+    libros:null
+
+};
