@@ -1,0 +1,9 @@
+mongodb://<dbuser>:<dbpassword>@ds129183.mlab.com:29183/tiendalibros
+
+mlab--
+user: CesaR560
+Password: Maco2017
+
+BD--
+User: admin
+Password: Sistemas1
